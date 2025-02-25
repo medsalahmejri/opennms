@@ -1,1 +1,30 @@
-runs-on: self-hosted
+name: Build and Push OpenNMS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  IMAGE_NAME: medsalahmejri/opennms
+
+jobs:
+  build:
+    name: Build and Push Docker Image
+    runs-on: self-hosted  # Utilisation du runner auto-hébergé
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t $IMAGE_NAME:${{ github.sha }} .
+
+      - name: Push Docker image
+        run: docker push $IMAGE_NAME:${{ github.sha }}
