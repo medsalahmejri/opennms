@@ -20,11 +20,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Vérifier si Docker est installé
+        run: docker --version
+
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Build Docker image
-        run: docker build -t $IMAGE_NAME:${{ github.sha }} .
+        run: |
+          docker build -t $IMAGE_NAME:${{ github.sha }} .
+          docker tag $IMAGE_NAME:${{ github.sha }} $IMAGE_NAME:latest
 
       - name: Push Docker image
-        run: docker push $IMAGE_NAME:${{ github.sha }}
+        run: |
+          docker push $IMAGE_NAME:${{ github.sha }}
+          docker push $IMAGE_NAME:latest
